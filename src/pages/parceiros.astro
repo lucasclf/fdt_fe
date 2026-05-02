@@ -1,0 +1,179 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { parceiros, tiposDisponiveis } from "../data/parceiros";
+
+const parceirosOrdenados = [...parceiros].sort((a, b) =>
+  a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+);
+
+function getInitials(nome: string) {
+  return nome
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((parte) => parte[0])
+    .join("")
+    .toUpperCase();
+}
+---
+
+<BaseLayout title="Lista de parceiros" description="Lista de parceiros com filtros por tipo.">
+  <section class="hero">
+    <span class="hero-eyebrow">Lista</span>
+    <h1>Parceiros</h1>
+    <p>
+      Filtre por tipo de parceiro ou pesquise pelo nome do NPC. As imagens devem ficar em
+      <code>public/parceiros</code> e seguir o padrão <code>Nome do NPC.png</code>.
+    </p>
+  </section>
+
+  <section class="filters-panel" aria-label="Filtros de parceiros">
+    <input
+      id="searchInput"
+      class="search-input"
+      type="search"
+      placeholder="Pesquisar por nome do NPC..."
+      autocomplete="off"
+    />
+
+    <div class="filter-buttons" role="group" aria-label="Filtrar por tipo">
+      <button class="filter-button active" type="button" data-filter="todos">Todos</button>
+      {tiposDisponiveis.map((tipo) => (
+        <button class="filter-button" type="button" data-filter={tipo}>{tipo}</button>
+      ))}
+    </div>
+
+    <span id="resultCount" class="result-count"></span>
+  </section>
+
+  <section id="partnersGrid" class="partners-grid" aria-label="Cards de parceiros">
+    {parceirosOrdenados.map((parceiro) => (
+      <article
+        class="partner-card"
+        data-name={parceiro.nome.toLowerCase()}
+        data-types={parceiro.tipos.join("|")}
+      >
+        <div class="partner-image-wrap">
+          <img
+            class="partner-image"
+            src={encodeURI(`/parceiros/${parceiro.imagem}`)}
+            alt={`Imagem de ${parceiro.nome}`}
+            loading="lazy"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
+          />
+          <div class="partner-image-fallback">{getInitials(parceiro.nome)}</div>
+        </div>
+
+        <div class="partner-content">
+          <h2>{parceiro.nome}</h2>
+
+          <div class="tags" aria-label={`Tipos de ${parceiro.nome}`}>
+            {parceiro.tipos.length > 0
+              ? parceiro.tipos.map((tipo) => <span class="tag">{tipo}</span>)
+              : <span class="tag empty">Sem tipo detectado</span>}
+          </div>
+
+          <ul class="ability-list">
+            {parceiro.habilidades.map((habilidade) => (
+                <li set:html={habilidade} />
+            ))}
+          </ul>
+        </div>
+      </article>
+    ))}
+  </section>
+
+  <p id="emptyState" class="empty-state">Nenhum parceiro encontrado com esse filtro.</p>
+
+  <script>
+    const filterButtons = Array.from(document.querySelectorAll(".filter-button"));
+    const cards = Array.from(document.querySelectorAll(".partner-card"));
+    const searchInput = document.querySelector("#searchInput");
+    const resultCount = document.querySelector("#resultCount");
+    const emptyState = document.querySelector("#emptyState");
+
+    let activeType = "todos";
+
+    function normalizeText(value) {
+      return value
+        .toString()
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function updateUrl() {
+      const url = new URL(window.location.href);
+      if (activeType === "todos") {
+        url.searchParams.delete("tipo");
+      } else {
+        url.searchParams.set("tipo", activeType);
+      }
+
+      const search = searchInput.value.trim();
+      if (search.length === 0) {
+        url.searchParams.delete("busca");
+      } else {
+        url.searchParams.set("busca", search);
+      }
+
+      window.history.replaceState({}, "", url);
+    }
+
+    function applyFilters() {
+      const search = normalizeText(searchInput.value);
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const name = normalizeText(card.dataset.name || "");
+        const types = (card.dataset.types || "").split("|").filter(Boolean);
+
+        const matchesType = activeType === "todos" || types.includes(activeType);
+        const matchesSearch = search.length === 0 || name.includes(search);
+        const shouldShow = matchesType && matchesSearch;
+
+        card.style.display = shouldShow ? "" : "none";
+        if (shouldShow) {
+          visibleCount += 1;
+        }
+      });
+
+      resultCount.textContent = `${visibleCount} parceiro(s) encontrado(s)`;
+      emptyState.style.display = visibleCount === 0 ? "block" : "none";
+      updateUrl();
+    }
+
+    filterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeType = button.dataset.filter || "todos";
+
+        filterButtons.forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+
+        applyFilters();
+      });
+    });
+
+    searchInput.addEventListener("input", applyFilters);
+
+    const params = new URLSearchParams(window.location.search);
+    const initialType = params.get("tipo");
+    const initialSearch = params.get("busca");
+
+    if (initialSearch) {
+      searchInput.value = initialSearch;
+    }
+
+    if (initialType) {
+      const button = filterButtons.find((item) => item.dataset.filter === initialType);
+      if (button) {
+        activeType = initialType;
+        filterButtons.forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+      }
+    }
+
+    applyFilters();
+  </script>
+</BaseLayout>

@@ -1,43 +1,118 @@
-# Astro Starter Kit: Minimal
+# Parceiros Astro
 
-```sh
-npm create astro@latest -- --template minimal
+Site estático simples para consultar parceiros, tipos e regras.
+
+## Stack
+
+- Astro
+- TypeScript
+- CSS puro
+- Cloudflare Pages
+
+## Requisitos
+
+- Node.js LTS instalado
+- npm
+
+## Rodar localmente
+
+```bash
+npm install
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Abra a URL mostrada no terminal.
 
-## 🚀 Project Structure
+## Gerar build estático
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```bash
+npm run build
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+O Astro vai gerar a pasta `dist/`.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Conferir o build localmente
 
-Any static assets, like images, can be placed in the `public/` directory.
+```bash
+npm run preview
+```
 
-## 🧞 Commands
+## Onde editar o conteúdo
 
-All commands are run from the root of the project, from a terminal:
+### Lista de parceiros
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+Arquivo:
 
-## 👀 Want to learn more?
+```txt
+src/data/parceiros.ts
+```
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Cada parceiro tem este formato:
+
+```ts
+{
+  id: "abner",
+  nome: "Abner",
+  imagem: "Abner.png",
+  tipos: ["Médico"],
+  habilidades: [
+    "Médico iniciante. Uma vez por turno..."
+  ]
+}
+```
+
+### Tipos de parceiros
+
+Arquivo:
+
+```txt
+src/data/tipos.ts
+```
+
+### Regras de usando parceiros e ferimento/morte
+
+Arquivo:
+
+```txt
+src/data/paginas.ts
+```
+
+## Imagens dos NPCs
+
+Coloque as imagens em:
+
+```txt
+public/parceiros
+```
+
+O nome precisa bater com o campo `imagem`.
+
+Exemplos:
+
+```txt
+public/parceiros/Abner.png
+public/parceiros/Mutuca.png
+public/parceiros/Arlo “Olho de Leite”.png
+```
+
+Se a imagem não existir, o card mostra um fallback com iniciais.
+
+## Filtro de parceiros
+
+A página `/parceiros` filtra por:
+
+- Tipo: Guardião, Médico, Perseguidor etc.
+- Nome do NPC
+
+O filtro roda no navegador com JavaScript simples, sem backend.
+
+## Deploy no Cloudflare Pages
+
+Use as configurações:
+
+```txt
+Build command: npm run build
+Build output directory: dist
+```
+
+Depois conecte o repositório do GitHub ao Cloudflare Pages.

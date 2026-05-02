@@ -1,0 +1,58 @@
+---
+import "../styles/global.css";
+
+type Props = {
+  title: string;
+  description?: string;
+};
+
+const { title, description = "Site estático de parceiros." } = Astro.props;
+const currentPath = Astro.url.pathname;
+
+const links = [
+  { href: "/", label: "Início" },
+  { href: "/parceiros", label: "Parceiros" },
+  { href: "/tipos-de-parceiros", label: "Tipos" },
+  { href: "/usando-parceiros", label: "Usando parceiros" },
+  { href: "/ferimento-e-morte-de-parceiros", label: "Ferimento e morte" },
+];
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">Parceiros</a>
+
+      <nav class="main-nav" aria-label="Navegação principal">
+        {links.map((link) => (
+          <a
+            href={link.href}
+            class:list={[
+              "nav-link",
+              currentPath === link.href || (link.href !== "/" && currentPath.startsWith(link.href))
+                ? "active"
+                : "",
+            ]}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
+    </header>
+
+    <main class="page-container">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <span>Site estático feito com Astro para Cloudflare Pages.</span>
+    </footer>
+  </body>
+</html>

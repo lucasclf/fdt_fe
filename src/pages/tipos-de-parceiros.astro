@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { tiposDeParceiros } from "../data/tipos";
+---
+
+<BaseLayout title="Tipos de parceiros" description="Tipos de parceiros e seus bônus.">
+  <section class="hero">
+    <span class="hero-eyebrow">Referência</span>
+    <h1>Tipos de parceiros</h1>
+    <p>
+      Consulte rapidamente o efeito de cada tipo de parceiro.
+    </p>
+  </section>
+
+  <section class="card-grid" aria-label="Tipos de parceiros">
+    {tiposDeParceiros.map((tipo) => (
+      <article class="type-card">
+        <h2>{tipo.nome}</h2>
+        <p>{tipo.descricao}</p>
+      </article>
+    ))}
+  </section>
+</BaseLayout>

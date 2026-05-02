@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { paginas } from "../data/paginas";
+
+const paragrafos = paginas.ferimentoEMorte
+  .split(/\n\s*\n/)
+  .map((paragrafo) => paragrafo.trim())
+  .filter(Boolean);
+---
+
+<BaseLayout title="Ferimento e morte de parceiros" description="Regras de ferimento e morte de parceiros.">
+  <section class="hero">
+    <span class="hero-eyebrow">Regras</span>
+    <h1>Ferimento e morte de parceiros</h1>
+    <p>Página reservada para as regras de ferimento e morte dos parceiros.</p>
+  </section>
+
+  <article class="content-card">
+    {paragrafos.map((paragrafo) => (
+      <p>{paragrafo}</p>
+    ))}
+  </article>
+</BaseLayout>

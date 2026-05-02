@@ -1,17 +1,39 @@
 ---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { parceiros, tiposDisponiveis } from "../data/parceiros";
 
+const parceirosComTipo = parceiros.filter((parceiro) => parceiro.tipos.length > 0).length;
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Parceiros">
+  <section class="hero">
+    <span class="hero-eyebrow">Compêndio</span>
+    <h1>Parceiros, regras e tipos em um site estático.</h1>
+    <p>
+      Use esta base para consultar NPCs, habilidades, tipos de parceiros e regras durante a mesa.
+      O projeto não usa backend, banco de dados ou autenticação.
+    </p>
+
+    <div class="action-row">
+      <a class="button" href="/parceiros">Ver lista de parceiros</a>
+      <a class="button secondary" href="/tipos-de-parceiros">Ver tipos</a>
+    </div>
+  </section>
+
+  <section class="stats-grid" aria-label="Resumo do conteúdo">
+    <article class="stat-card">
+      <strong>{parceiros.length}</strong>
+      <span>parceiros cadastrados</span>
+    </article>
+
+    <article class="stat-card">
+      <strong>{tiposDisponiveis.length}</strong>
+      <span>tipos disponíveis para filtro</span>
+    </article>
+
+    <article class="stat-card">
+      <strong>{parceirosComTipo}</strong>
+      <span>parceiros com ao menos um tipo detectado</span>
+    </article>
+  </section>
+</BaseLayout>

@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { paginas } from "../data/paginas";
+
+const paragrafos = paginas.usandoParceiros
+  .split(/\n\s*\n/)
+  .map((paragrafo) => paragrafo.trim())
+  .filter(Boolean);
+---
+
+<BaseLayout title="Usando parceiros" description="Regras para usar parceiros.">
+  <section class="hero">
+    <span class="hero-eyebrow">Regras</span>
+    <h1>Usando parceiros</h1>
+    <p>Resumo das regras para comandar parceiros durante a rodada.</p>
+  </section>
+
+  <article class="content-card">
+    {paragrafos.map((paragrafo) => (
+      <p>{paragrafo}</p>
+    ))}
+  </article>
+</BaseLayout>
