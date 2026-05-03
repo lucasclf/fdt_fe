@@ -2,10 +2,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { parceiros, tiposDisponiveis } from "../data/parceiros";
 
-const parceirosOrdenados = [...parceiros].sort((a, b) =>
-  a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
-);
-
 function getInitials(nome: string) {
   return nome
     .split(/\s+/)
@@ -47,7 +43,7 @@ function getInitials(nome: string) {
   </section>
 
   <section id="partnersGrid" class="partners-grid" aria-label="Cards de parceiros">
-    {parceirosOrdenados.map((parceiro) => (
+    {parceiros.map((parceiro) => (
       <article
         class="partner-card"
         data-name={parceiro.nome.toLowerCase()}
@@ -75,7 +71,7 @@ function getInitials(nome: string) {
 
           <ul class="ability-list">
             {parceiro.habilidades.map((habilidade) => (
-                <li set:html={habilidade} />
+              <li>{habilidade}</li>
             ))}
           </ul>
         </div>

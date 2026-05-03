@@ -1,0 +1,229 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { categoriasMagiaDisponiveis, circulosMagiaDisponiveis, magias } from "../data/magias";
+
+const magiasOrdenadas = [...magias].sort((a, b) =>
+  a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" })
+);
+
+const totalPrimeiroCirculo = magiasOrdenadas.filter((magia) => magia.circulo === 1).length;
+const totalSegundoCirculo = magiasOrdenadas.filter((magia) => magia.circulo === 2).length;
+---
+
+<BaseLayout title="Magias" description="Lista de magias de primeiro e segundo círculo com filtros.">
+  <section class="hero">
+    <span class="hero-eyebrow">Consulta</span>
+    <h1>Magias de 1º e 2º círculo</h1>
+    <p>
+      Use os filtros para consultar magias por círculo e por função. Cada card mostra o custo base,
+      o efeito principal e os aumentos de PM disponíveis de forma direta.
+    </p>
+  </section>
+
+  <section class="spell-cost-grid" aria-label="Custos base por círculo">
+    <article class="spell-cost-card">
+      <strong>1º círculo</strong>
+      <span>custa <b>1 PM + os aumentos escolhidos</b>.</span>
+    </article>
+
+    <article class="spell-cost-card">
+      <strong>2º círculo</strong>
+      <span>custa <b>2 PM + os aumentos escolhidos</b>.</span>
+    </article>
+  </section>
+
+  <section class="filters-panel" aria-label="Filtros de magias">
+    <input
+      id="spellSearchInput"
+      class="search-input"
+      type="search"
+      placeholder="Pesquisar por nome, escola, tipo, descrição ou aumento..."
+      autocomplete="off"
+    />
+
+    <div class="filter-group">
+      <strong>Círculo</strong>
+      <div class="filter-buttons" role="group" aria-label="Filtrar por círculo">
+        <button class="filter-button active" type="button" data-circle-filter="todos">Todos</button>
+        {circulosMagiaDisponiveis.map((circulo) => (
+          <button class="filter-button" type="button" data-circle-filter={String(circulo)}>
+            {circulo}º círculo
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <strong>Função</strong>
+      <div class="filter-buttons" role="group" aria-label="Filtrar por função">
+        <button class="filter-button active" type="button" data-category-filter="todos">Todas</button>
+        {categoriasMagiaDisponiveis.map((categoria) => (
+          <button class="filter-button" type="button" data-category-filter={categoria}>{categoria}</button>
+        ))}
+      </div>
+    </div>
+
+    <span id="spellResultCount" class="result-count"></span>
+  </section>
+
+  <section class="stats-grid spell-stats" aria-label="Resumo das magias cadastradas">
+    <article class="stat-card">
+      <strong>{magiasOrdenadas.length}</strong>
+      <span>magias cadastradas</span>
+    </article>
+
+    <article class="stat-card">
+      <strong>{totalPrimeiroCirculo}</strong>
+      <span>magias de 1º círculo</span>
+    </article>
+
+    <article class="stat-card">
+      <strong>{totalSegundoCirculo}</strong>
+      <span>magias de 2º círculo</span>
+    </article>
+  </section>
+
+  <section id="spellsGrid" class="spells-grid" aria-label="Cards de magias">
+    {magiasOrdenadas.map((magia) => (
+      <article
+        class="spell-card"
+        data-name={magia.nome.toLowerCase()}
+        data-circle={String(magia.circulo)}
+        data-categories={magia.categorias.join("|")}
+        data-search={`${magia.nome} ${magia.tipo} ${magia.escola} ${magia.categorias.join(" ")} ${magia.resumo} ${magia.aumentos.join(" ")}`.toLowerCase()}
+      >
+        <header class="spell-card-header">
+          <div>
+            <span class="spell-eyebrow">{magia.tipo} • {magia.escola}</span>
+            <h2>{magia.nome}</h2>
+          </div>
+
+          <span class="spell-circle">{magia.circulo}º</span>
+        </header>
+
+        <div class="tags">
+          <span class="tag">{magia.custoBase}</span>
+          {magia.categorias.map((categoria) => (
+            <span class="tag">{categoria}</span>
+          ))}
+        </div>
+
+        <p class="spell-cost-note">
+          Custo: <strong>{magia.custoBase} + aumentos escolhidos</strong>.
+        </p>
+
+        {magia.detalhes && <p class="spell-details">{magia.detalhes}</p>}
+
+        <section class="spell-description" aria-label={`Descrição de ${magia.nome}`}>
+          <h3>Efeito principal</h3>
+          <p>{magia.resumo}</p>
+        </section>
+
+        <section class="spell-augmentations" aria-label={`Aumentos de PM de ${magia.nome}`}>
+          <h3>Aumentos de PM</h3>
+
+          {magia.aumentos.length > 0 ? (
+            <ul class="augmentation-list">
+              {magia.aumentos.map((aumento) => {
+                const [custo, ...descricaoParts] = aumento.split(":");
+                const descricao = descricaoParts.join(":").trim();
+
+                return (
+                  <li>
+                    <strong>{custo}</strong>
+                    {descricao && <span>: {descricao}</span>}
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p class="spell-no-augmentations">Sem aumentos de PM descritos no PDF.</p>
+          )}
+        </section>
+
+        <footer class="spell-source">
+          Fonte: {magia.fonte} · página {magia.pagina}
+        </footer>
+      </article>
+    ))}
+  </section>
+
+  <p id="spellEmptyState" class="empty-state">
+    Nenhuma magia encontrada com os filtros selecionados.
+  </p>
+
+  <script>
+    const searchInput = document.querySelector("#spellSearchInput");
+    const resultCount = document.querySelector("#spellResultCount");
+    const emptyState = document.querySelector("#spellEmptyState");
+    const cards = Array.from(document.querySelectorAll(".spell-card"));
+
+    let activeCircle = "todos";
+    let activeCategory = "todos";
+
+    function normalize(value) {
+      return value
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function updateButtonState(buttons, activeValue, dataAttribute) {
+      buttons.forEach((button) => {
+        button.classList.toggle("active", button.dataset[dataAttribute] === activeValue);
+      });
+    }
+
+    function updateFilters() {
+      const query = normalize(searchInput.value.trim());
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const searchText = normalize(card.dataset.search || "");
+        const circle = card.dataset.circle;
+        const categories = (card.dataset.categories || "").split("|");
+
+        const matchesSearch = !query || searchText.includes(query);
+        const matchesCircle = activeCircle === "todos" || circle === activeCircle;
+        const matchesCategory = activeCategory === "todos" || categories.includes(activeCategory);
+
+        const isVisible = matchesSearch && matchesCircle && matchesCategory;
+        card.hidden = !isVisible;
+
+        if (isVisible) {
+          visibleCount += 1;
+        }
+      });
+
+      resultCount.textContent =
+        visibleCount === 1
+          ? "1 magia encontrada"
+          : `${visibleCount} magias encontradas`;
+
+      emptyState.style.display = visibleCount === 0 ? "block" : "none";
+    }
+
+    const circleButtons = Array.from(document.querySelectorAll("[data-circle-filter]"));
+    const categoryButtons = Array.from(document.querySelectorAll("[data-category-filter]"));
+
+    circleButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeCircle = button.dataset.circleFilter;
+        updateButtonState(circleButtons, activeCircle, "circleFilter");
+        updateFilters();
+      });
+    });
+
+    categoryButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeCategory = button.dataset.categoryFilter;
+        updateButtonState(categoryButtons, activeCategory, "categoryFilter");
+        updateFilters();
+      });
+    });
+
+    searchInput.addEventListener("input", updateFilters);
+
+    updateFilters();
+  </script>
+</BaseLayout>

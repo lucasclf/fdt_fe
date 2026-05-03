@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { parceiros, tiposDisponiveis } from "../data/parceiros";
+import { magias } from "../data/magias";
 
 const parceirosComTipo = parceiros.filter((parceiro) => parceiro.tipos.length > 0).length;
 ---
@@ -17,6 +18,7 @@ const parceirosComTipo = parceiros.filter((parceiro) => parceiro.tipos.length > 
     <div class="action-row">
       <a class="button" href="/parceiros">Ver lista de parceiros</a>
       <a class="button secondary" href="/tipos-de-parceiros">Ver tipos</a>
+      <a class="button secondary" href="/magias">Ver magias</a>
     </div>
   </section>
 
@@ -34,6 +36,11 @@ const parceirosComTipo = parceiros.filter((parceiro) => parceiro.tipos.length > 
     <article class="stat-card">
       <strong>{parceirosComTipo}</strong>
       <span>parceiros com ao menos um tipo detectado</span>
+    </article>
+
+    <article class="stat-card">
+      <strong>{magias.length}</strong>
+      <span>magias de 1º e 2º círculo cadastradas</span>
     </article>
   </section>
 </BaseLayout>
